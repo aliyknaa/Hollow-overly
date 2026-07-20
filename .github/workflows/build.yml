@@ -19,26 +19,27 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Unzip project.zip and Prepare Files
+      run: |
+        unzip -o project.zip -d extracted_files
+        if [ -d "extracted_files/android-project" ]; then
+          cp -r extracted_files/android-project/* .
+        elif [ -d "extracted_files/app" ]; then
+          cp -r extracted_files/* .
+        else
+          cp -r extracted_files/* .
+        fi
+
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
 
     - name: Build APK with Gradle
       run: |
-        # Check if project is in root or subfolder and build
-        if [ -f "gradlew" ]; then
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
-        elif [ -d "android-project" ]; then
-          cd android-project
-          chmod +x gradlew || true
-          ./gradlew assembleDebug --stacktrace || gradle assembleDebug
-        fi
+        chmod +x gradlew || true
+        ./gradlew assembleDebug --stacktrace || gradle assembleDebug
 
-    - name: Upload APK
+    - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: HollowOverlay-APK
-        path: |
-          app/build/outputs/apk/debug/app-debug.apk
-          android-project/app/build/outputs/apk/debug/app-debug.apk
-          
+        path: app/build/outputs/apk/debug/app-debug.apk
